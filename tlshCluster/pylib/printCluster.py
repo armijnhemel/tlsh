@@ -42,6 +42,7 @@ def printAllCluster(outfname, cenfname, cluster, memberList, tlshList, tobjList,
             printCluster(f, cenf, ci, cluster, memberList, tlshList, tobjList, labelList, dateList)
 
     f.close()
+    if verbose >= 1:
         print("written ", outfname)
 
     if cenfname != "":
