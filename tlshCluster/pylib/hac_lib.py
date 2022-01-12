@@ -43,8 +43,8 @@ def median(currlist):
 
 class Node:
     def __init__(self, point, tobj=None, idx=-1, threshold=0):
-        self.LC = None
-        self.RC = None
+        self.left_child = None
+        self.right_child = None
         self.point = point
         self.tobj = tobj
         self.idx = idx
@@ -54,34 +54,34 @@ class Node:
     def insert(self, point):
         if self.point:
             if point < self.point:
-                if self.LC is None:
-                    self.LC = Node(point)
+                if self.left_child is None:
+                    self.left_child = Node(point)
                 else:
-                    self.LC.insert(point)
+                    self.left_child.insert(point)
             elif point > self.point:
-                if self.RC is None:
-                    self.RC = Node(point)
+                if self.right_child is None:
+                    self.right_child = Node(point)
                 else:
-                    self.RC.insert(point)
+                    self.right_child.insert(point)
         else:
             self.point = point
 
     # Print the tree
-    def PrintTree(self,maxdepth,depth):
+    def PrintTree(self, maxdepth, depth):
         if depth > maxdepth:
             print( "..." )
             return
 
-        if self.LC:
-            self.LC.PrintTree(maxdepth,depth+1)
+        if self.left_child:
+            self.left_child.PrintTree(maxdepth,depth+1)
         print ( depth * "\t", end="" )
         if self.threshold == -1:
             print( "LEAF:  idx=" + str(self.idx) + " " + self.point )
         else:
             print( "SPLIT: idx=" + str(self.idx) + " " + self.point + " T=" + str(self.threshold))
 
-        if self.RC:
-            self.RC.PrintTree(maxdepth,depth+1)
+        if self.right_child:
+            self.right_child.PrintTree(maxdepth,depth+1)
 
 hac_nDistCalc=0
 
@@ -131,8 +131,8 @@ def VPTGrow(tlshList, tobjList, tidxList):
             tobjRight.append(tobjList[li])
             tidxRight.append(tidxList[li])
 
-    thisNode.LC = VPTGrow(tlshLeft,  tobjLeft,  tidxLeft)
-    thisNode.RC = VPTGrow(tlshRight, tobjRight, tidxRight)
+    thisNode.left_child = VPTGrow(tlshLeft,  tobjLeft,  tidxLeft)
+    thisNode.right_child = VPTGrow(tlshRight, tobjRight, tidxRight)
     return thisNode
 
 def distMetric(tobj, searchItem):
@@ -154,13 +154,13 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
         best['idx'] = node.idx
 
     if d <= node.threshold:
-        VPTSearch(node.LC, searchItem, searchIdx, cluster, notInC, best)
+        VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, best)
         if (d + best['dist'] + extra_constant) >= node.threshold:
-            VPTSearch(node.RC, searchItem, searchIdx, cluster, notInC, best)
+            VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, best)
         else:
             if metricCheck:
                 rightbest = { "dist":best['dist'], "point":None, "idx":best['idx'] }
-                VPTSearch(node.RC, searchItem, searchIdx, cluster, notInC, rightbest)
+                VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, rightbest)
                 if rightbest['idx'] != best['idx']:
                     print("found problem right", file=sys.stderr)
                     print("best:", best, file=sys.stderr)
@@ -169,13 +169,13 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
                     print(rightbest, file=sys.stderr)
                     sys.exit(1)
     else:
-        VPTSearch(node.RC, searchItem, searchIdx, cluster, notInC, best)
+        VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, best)
         if (d - best['dist'] - extra_constant) <= node.threshold:
-            VPTSearch(node.LC, searchItem, searchIdx, cluster, notInC, best)
+            VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, best)
         else:
             if metricCheck:
                 leftbest = { "dist":best['dist'], "point":None, "idx":best['idx'] }
-                VPTSearch(node.LC, searchItem, searchIdx, cluster, notInC, leftbest)
+                VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, leftbest)
                 if leftbest['idx'] != best['idx']:
                     print("found problem left", file=sys.stderr)
                     print("best:", best, file=sys.stderr)
