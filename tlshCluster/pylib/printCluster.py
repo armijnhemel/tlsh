@@ -1,5 +1,6 @@
 #################################################################
-# TLSH is provided for use under two licenses: Apache OR BSD. Users may opt to use either license depending on the license
+# TLSH is provided for use under two licenses: Apache OR BSD. Users
+# may opt to use either license depending on the license
 # restictions of the systems with which they plan to integrate the TLSH code.
 #
 # Apache License: # Copyright 2013 Trend Micro Incorporated
@@ -15,26 +16,22 @@
 from collections import Counter
 
 def printAllCluster(outfname, cenfname, cluster, memberList, tlshList, tobjList, labels, verbose):
-    ###########
+    '''Write cluster and centers output files'''
+
     # cluster output file
-    ###########
     f = open(outfname, "w")
     if f is None:
         print("error: cannot write  to ", outfname)
         return
-    # end if
-    ###########
+
     # centers output file (csv file of cluster centers)
-    ###########
     cenf = None
     if cenfname != "":
         cenf = open(cenfname, "w")
-        if f is None:
+        if cenf is None:
             print("error: cannot write  to ", cenfname)
             return
-        # end if
         cenf.write("tlsh,family,firstSeen,label,radius,nitems\n")
-    # end if
 
     labelList = labels[0]
     dateList  = labels[1]
@@ -43,24 +40,19 @@ def printAllCluster(outfname, cenfname, cluster, memberList, tlshList, tobjList,
         ml = memberList[ci]
         if len(ml) > 1:
             printCluster(f, cenf, ci, cluster, memberList, tlshList, tobjList, labelList, dateList)
-        # end if
-    # end for
 
-    if verbose >= 1:
-        f.close()
+    f.close()
         print("written ", outfname)
-        if cenfname != "":
-            cenf.close()
+
+    if cenfname != "":
+        cenf.close()
+        if verbose >= 1:
             print("written ", cenfname)
-        # end if
-    # end if
 
 def estimateRadius(ml, tobjList):
     nlist = len(ml)
 
-    #########################
-    # sample max 100 points to calc radius
-    #########################
+    # sample max 100 points to determine the radius
     nsteps = 100
     jump = int(nlist / nsteps)
     maxni = jump * nsteps
@@ -82,14 +74,11 @@ def estimateRadius(ml, tobjList):
                 d = hx.diff(hy)
                 if d > radx:
                     radx = d
-                # end if
-            # end if
-        # end for
+
         if radx < rad_cluster:
             rad_cluster = radx
             rad_idx = x
-        # end if
-    # end for
+
     return rad_cluster
 
 def printCluster(f, cenf, gA, cluster, memberList, tlshList, tobjList, labelList, dateList):
@@ -107,20 +96,16 @@ def printCluster(f, cenf, gA, cluster, memberList, tlshList, tobjList, labelList
                 d = hx.diff(hy)
                 if d > radx:
                     radx = d
-                # end if
-            # end if
-        # end for
+
         if radx < rad_cluster:
             rad_cluster = radx
             rad_idx = x
-        # end if
+
         if (labelList is not None) and (len(labelList) > 0):
             if labelList[x] != "NO_SIG":
                 labelSet.add(labelList[x].lower())
-    # end for
-    ################################
+
     # identify the most common label
-    ################################
     nlabel=len(labelSet)
     labelMostCommon = "NULL"
     if nlabel == 0:
@@ -131,30 +116,30 @@ def printCluster(f, cenf, gA, cluster, memberList, tlshList, tobjList, labelList
         if len(tmpList) > 0:
             c = Counter(tmpList)
             labelMostCommonTuple = c.most_common(1)[0]
-            labelMostCommon = labelMostCommonTuple[0] # end if # end if ################################ # identify the first time value
-    ################################
+            labelMostCommon = labelMostCommonTuple[0]
+
+    # identify the first time value
     firstSeen = "NULL"
     if dateList is not None:
         clusterTimeList = [dateList[x] for x in outml]
         firstSeen = min( clusterTimeList )
         tmpList = [labelList[x] for x in outml if labelList[x] != "n/a"]
-    # end if
-    ################################
+
     f.write("members:\t" + str(outml) + "\n" )
     f.write("labels:\t" + labelStr + "\n" )
     f.write("nlabels:\t" + str(nlabel) + "\n" )
     f.write("nitems:\t" + str(nitems) + "\n" )
     f.write("center:\t" + tlshList[rad_idx] + "\n" )
     f.write("radius:\t" + str(rad_cluster) + "\n" )
+
     if len(labelList) > 0:
         for x in outml:
             f.write("\t" + tlshList[x] + "\t" + labelList[x] + "\n")
-        # end for
+
     else:
         for x in outml:
             f.write("\t" + tlshList[x] + "\n")
-        # end for
-    # end if
+
     if cenf is not None:
         if labelMostCommon == "NULL":
             labelMostCommon = "Cluster " + str(gA)
@@ -167,4 +152,3 @@ def printCluster(f, cenf, gA, cluster, memberList, tlshList, tobjList, labelList
         cenf.write(str(rad_cluster) + "," )
         cenf.write(str(nitems))
         cenf.write("\n" )
-    # end if
