@@ -162,11 +162,11 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
                 rightbest = { "dist":best['dist'], "point":None, "idx":best['idx'] }
                 VPTSearch(node.RC, searchItem, searchIdx, cluster, notInC, rightbest)
                 if rightbest['idx'] != best['idx']:
-                    print("found problem right")
-                    print("best:", best)
-                    print("d:", d)
-                    print("threshold:", node.threshold)
-                    print(rightbest)
+                    print("found problem right", file=sys.stderr)
+                    print("best:", best, file=sys.stderr)
+                    print("d:", d, file=sys.stderr)
+                    print("threshold:", node.threshold, file=sys.stderr)
+                    print(rightbest, file=sys.stderr)
                     sys.exit(1)
     else:
         VPTSearch(node.RC, searchItem, searchIdx, cluster, notInC, best)
@@ -177,11 +177,11 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
                 leftbest = { "dist":best['dist'], "point":None, "idx":best['idx'] }
                 VPTSearch(node.LC, searchItem, searchIdx, cluster, notInC, leftbest)
                 if leftbest['idx'] != best['idx']:
-                    print("found problem left")
-                    print("best:", best)
-                    print("d:", d)
-                    print("threshold:", node.threshold)
-                    print(leftbest)
+                    print("found problem left", file=sys.stderr)
+                    print("best:", best, file=sys.stderr)
+                    print("d:", d, file=sys.stderr)
+                    print("threshold:", node.threshold, file=sys.stderr)
+                    print(leftbest, file=sys.stderr)
                     sys.exit(1)
 
 def Tentative_Merge(gA, gB, cluster, memberList, tlshList, tobjList, rootVPT, CDist):
@@ -283,8 +283,8 @@ def VPTsearch_add_to_heap(A, cluster, tobjList, rootVPT, heap):
             lindist = linbest['dist']
             linB    = linbest['idx']
             if lindist < dist:
-                print("error: dist=", dist, "B=", B)
-                print("error: lindist=", lindist, "linB=", linB)
+                print("error: dist=", dist, "B=", B, file=sys.stderr)
+                print("error: lindist=", lindist, "linB=", linB, file=sys.stderr)
                 sys.exit()
 
 showTiming = 1
