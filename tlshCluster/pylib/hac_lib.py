@@ -657,3 +657,35 @@ def read_data(fname):
     # end for
     # print("end")
     return (tlshList, tobjList, labels)
+
+def estimateRadius(ml, tobjList):
+    nlist = len(ml)
+
+    # sample max 100 points to determine the radius
+    nsteps = 100
+    jump = int(nlist / nsteps)
+    maxni = jump * nsteps
+    if jump == 0:
+        jump = 1
+        maxni = nlist
+
+    rad_cluster = 99999
+    rad_idx = -1
+
+    for xi in range(0, maxni, jump):
+        x = ml[xi]
+        hx = tobjList[x]
+        radx=0
+        for yi in range(0, maxni, jump):
+            y = ml[yi]
+            if x != y:
+                hy = tobjList[y]
+                d = hx.diff(hy)
+                if d > radx:
+                    radx = d
+
+        if radx < rad_cluster:
+            rad_cluster = radx
+            rad_idx = x
+
+    return rad_cluster
