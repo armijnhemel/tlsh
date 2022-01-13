@@ -86,8 +86,6 @@ class Node:
 
 def vpt_grow(tobjList, tidxList):
     lenList = len(tobjList)
-    if lenList == 0:
-        return
 
     vpObj = tobjList[0]
     vpIdx = tidxList[0]
@@ -97,7 +95,10 @@ def vpt_grow(tobjList, tidxList):
         return thisNode
 
     distList = [vpObj.diff(h1) for h1 in tobjList]
+
+    # compute the median
     med = median(distList)
+
     # if med == 0:
     #     print("med = 0")
     #     print(distList)
@@ -118,9 +119,15 @@ def vpt_grow(tobjList, tidxList):
             tobjRight.append(tobjList[li])
             tidxRight.append(tidxList[li])
 
-    # recursively walk the data
-    thisNode.left_child = vpt_grow(tobjLeft,  tidxLeft)
-    thisNode.right_child = vpt_grow(tobjRight, tidxRight)
+    # recursively walk the data, unless there is no data
+    if tobjLeft != []:
+        thisNode.left_child = vpt_grow(tobjLeft,  tidxLeft)
+    else:
+        thisNode.left_child = None
+    if tobjRight != []:
+        thisNode.right_child = vpt_grow(tobjRight, tidxRight)
+    else:
+        thisNode.right_child = None
     return thisNode
 
 def distMetric(tobj, searchItem):
