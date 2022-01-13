@@ -89,17 +89,16 @@ def vpt_grow(tobjList, tidxList):
         thisNode = Node(vpObj, vpIdx, -1)
         return thisNode
 
-    distList = [vpObj.diff(h1) for h1 in tobjList]
+    # compute the TLSH distances for each object
+    distances_list = [vpObj.diff(h1) for h1 in tobjList]
 
     # determine the median
-    med = statistics.median_low(distList)
+    med = statistics.median_low(distances_list)
 
-    # if med == 0:
-    #     print("med = 0")
-    #     print(distList)
     thisNode = Node(vpObj, vpIdx, med)
 
-    # split data into two lists: left and right
+    # split data into two lists: left child and right
+    # child depending on the TLSH distance to vpObj
     tobjLeft = []
     tidxLeft = []
 
@@ -107,14 +106,14 @@ def vpt_grow(tobjList, tidxList):
     tidxRight = []
 
     for li in range(1, lenList):
-        if distList[li] < med:
+        if distances_list[li] < med:
             tobjLeft.append(tobjList[li])
             tidxLeft.append(tidxList[li])
         else:
             tobjRight.append(tobjList[li])
             tidxRight.append(tidxList[li])
 
-    # recursively walk the data, unless there is no data
+    # recursively walk the data, unless there is no more data
     if tobjLeft != []:
         thisNode.left_child = vpt_grow(tobjLeft,  tidxLeft)
     else:
