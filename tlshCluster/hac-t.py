@@ -14,7 +14,7 @@ def simple_unittests():
 
     tidx_list = range(0, len(tlsh_list))
     root = VPTGrow(tlsh_list, tobj_list, tidx_list)
-    root.PrintTree(3, 0)
+    root.print_tree(3, 0)
 
     ### id = 9655
     identifier = 9

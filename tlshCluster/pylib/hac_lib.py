@@ -37,11 +37,9 @@ def median(currlist):
     mid = int((listlen-1)/2)
     return newlist[mid]
 
-###################################
-# VP Tree
-###################################
 
 class Node:
+    '''Vantage point tree'''
     def __init__(self, point, tobj=None, idx=-1, threshold=0):
         self.left_child = None
         self.right_child = None
@@ -67,13 +65,13 @@ class Node:
             self.point = point
 
     # Print the tree
-    def PrintTree(self, maxdepth, depth):
+    def print_tree(self, maxdepth, depth):
         if depth > maxdepth:
             print( "..." )
             return
 
         if self.left_child:
-            self.left_child.PrintTree(maxdepth,depth+1)
+            self.left_child.print_tree(maxdepth,depth+1)
         print ( depth * "\t", end="" )
         if self.threshold == -1:
             print( "LEAF:  idx=" + str(self.idx) + " " + self.point )
@@ -81,7 +79,7 @@ class Node:
             print( "SPLIT: idx=" + str(self.idx) + " " + self.point + " T=" + str(self.threshold))
 
         if self.right_child:
-            self.right_child.PrintTree(maxdepth,depth+1)
+            self.right_child.print_tree(maxdepth,depth+1)
 
 hac_nDistCalc=0
 
@@ -423,7 +421,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     rootVPT = VPTGrow(tlshList, tobjList, tidxList)
 
     cluster = list(range(0, ndata))
-    heap=MinHeap()
+    heap = MinHeap()
     for A in Dn:
         VPTsearch_add_to_heap(A, cluster, tobjList, rootVPT, heap)
 
@@ -505,10 +503,10 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     if (hac_verbose >= 1) or (showNumberClusters >= 1):
         print_number_clusters(memberList)
 
-    tent_heap=MinHeap()
+    tent_heap = MinHeap()
     tent_dict = {}
     for A in Dn:
-        best = { "dist":99999, "point":None, "idx":-1 }
+        best = {"dist":99999, "point":None, "idx":-1}
         searchItem = tobjList[A]
         VPTSearch(rootVPT, searchItem, A, cluster, cluster[A], best)
         dist = best['dist']
