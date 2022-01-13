@@ -41,28 +41,28 @@ def median(currlist):
 class Node:
     '''Vantage point tree'''
     def __init__(self, point, tobj=None, idx=-1, threshold=0):
-        self.left_child = None
-        self.right_child = None
+        self._left_child = None
+        self._right_child = None
         self.point = point
         self.tobj = tobj
         self.idx = idx
         self.threshold = threshold
 
-    # Compare the new value with the parent node
-    def insert(self, point):
-        if self.point:
-            if point < self.point:
-                if self.left_child is None:
-                    self.left_child = Node(point)
-                else:
-                    self.left_child.insert(point)
-            elif point > self.point:
-                if self.right_child is None:
-                    self.right_child = Node(point)
-                else:
-                    self.right_child.insert(point)
-        else:
-            self.point = point
+    @property
+    def left_child(self):
+        return self._left_child
+
+    @left_child.setter
+    def left_child(self, node):
+        self._left_child = node
+
+    @property
+    def right_child(self):
+        return self._right_child
+
+    @right_child.setter
+    def right_child(self, node):
+        self._right_child = node
 
     # Print the tree
     def print_tree(self, maxdepth, depth):
@@ -70,7 +70,7 @@ class Node:
             print("...")
             return
 
-        if self.left_child:
+        if self.left_child is not None:
             self.left_child.print_tree(maxdepth, depth+1)
         print(depth * "\t", end="")
         if self.threshold == -1:
@@ -78,18 +78,8 @@ class Node:
         else:
             print("SPLIT: idx=" + str(self.idx) + " " + self.point + " T=" + str(self.threshold))
 
-        if self.right_child:
+        if self.right_child is not None:
             self.right_child.print_tree(maxdepth, depth+1)
-
-hac_nDistCalc = 0
-
-def hac_resetDistCalc():
-    global hac_nDistCalc
-    hac_nDistCalc = 0
-
-def hac_lookupDistCalc():
-    global hac_nDistCalc
-    return hac_nDistCalc
 
 def vpt_grow(tlshList, tobjList, tidxList):
     lenList = len(tlshList)
@@ -104,8 +94,6 @@ def vpt_grow(tlshList, tobjList, tidxList):
         thisNode = Node(vpTlsh, vpObj, vpIdx, -1)
         return thisNode
 
-    global hac_nDistCalc
-    hac_nDistCalc += len(tobjList)
     distList = [vpObj.diff(h1) for h1 in tobjList]
     med = median(distList)
     # if med == 0:
@@ -113,12 +101,15 @@ def vpt_grow(tlshList, tobjList, tidxList):
     #     print(distList)
     thisNode = Node(vpTlsh, vpObj, vpIdx, med)
 
+    # split data into two lists: left and right
     tlshLeft = []
     tobjLeft = []
     tidxLeft = []
+
     tlshRight = []
     tobjRight = []
     tidxRight = []
+
     for li in range(1, lenList):
         if distList[li] < med:
             tlshLeft.append(tlshList[li])
@@ -129,13 +120,12 @@ def vpt_grow(tlshList, tobjList, tidxList):
             tobjRight.append(tobjList[li])
             tidxRight.append(tidxList[li])
 
+    # recursively walk the data
     thisNode.left_child = vpt_grow(tlshLeft,  tobjLeft,  tidxLeft)
     thisNode.right_child = vpt_grow(tlshRight, tobjRight, tidxRight)
     return thisNode
 
 def distMetric(tobj, searchItem):
-    global hac_nDistCalc
-    hac_nDistCalc += 1
     d = searchItem.diff(tobj)
     return d
 
