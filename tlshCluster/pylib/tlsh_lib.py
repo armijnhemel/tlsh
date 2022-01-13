@@ -103,42 +103,6 @@ def tlsh_dendrogram(tlist, labelList=None):
     plt.show()
 
 ##########################################
-# show a malware bazaar cluster
-##########################################
-def mb_show_sha1(family, thisDate=None, nitems=None, fname="malbaz/clust_389300.csv", showN=10, showC=1):
-    (tlist, labels) = tlsh_csvfile(fname, searchColName="family", searchValueList=[family], sDate=thisDate, eDate=thisDate, searchNitems=nitems)
-    if tlist is None:
-        return
-    if len(tlist) == 0:
-        print("found no cluster")
-    elif len(tlist) <= showC:
-        for cenTlsh in tlist:
-            print("cluster with cenTlsh=" + cenTlsh)
-            fullmb = "malbaz/mb_full.csv"
-            (tlist2, labels2) = tlsh_csvfile(fullmb, simTlsh=cenTlsh, simThreshold=30)
-            if tlist2 is None:
-                print("you need to run the script process_mb.sh in malbaz")
-                return
-
-            nfound = len(tlist2)
-            if nfound > showN:
-                print("showing first ", showN, " samples")
-                print("increase the showN parameter to show more..." )
-                nfound = showN
-
-            labList  = labels2[0]
-            dateList = labels2[1]
-            hashList = labels2[2]
-            for idx in range(nfound):
-                # print(tlist2[idx] + "\t" + labList[idx] + "\t" + dateList[idx] + "\t" + hashList[idx] )
-                print(hashList[idx] )
-    else:
-        print("found ", len(tlist), " clusters.")
-        print("Use parameters 'thisDate' and 'nitems' to uniquely specify cluster")
-        print("OR")
-        print("set showC parameter to show more clusters")
-
-##########################################
 # tlsh_csv files
 ##########################################
 
