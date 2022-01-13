@@ -107,22 +107,25 @@ def tlsh_dendrogram(tlist, labelList=None):
 ##########################################
 
 def tlsh_csvfile(fname, searchColName=None, searchValueList=None, simTlsh=None, simThreshold=150, sDate=None, eDate=None, searchNitems=None, verbose=0):
-    tlshCol=-1
-    hashCol=-1
-    lablCol=-1
-    timeCol=-1
-    othCol=-1
-    srchCol=-1
-    itemCol=-1
+    # store the index for the different columns in the CSV file
+    # instead of expecting a fixed order in the CSV files
+    tlsh_column = -1
+    hash_column = -1
+    label_column = -1
+    time_column = -1
+    othCol = -1
+    search_column = -1
+    item_column = -1
 
-    tlist=[]
-    labelList=[]
-    dateList =[]
-    hashList =[]
+    tlist = []
+    labelList = []
+    dateList = []
+    hashList = []
     addSampleFlag = True
 
     if (simTlsh is not None) and (simThreshold == 150):
-        print("using default simThreshold=150")
+        if verbose > 0:
+            print("using default simThreshold=150")
 
     # make all lower case so that we catch inconsistencies in the use of case
     if searchValueList is not None:
@@ -131,125 +134,135 @@ def tlsh_csvfile(fname, searchColName=None, searchValueList=None, simTlsh=None, 
     try:
         csv_file = open(fname)
     except:
-        print("error: could not find file: " + fname)
+        print("error: could not find file: " + fname, file=sys.stderr)
         return (None, None)
 
-    csv_reader = csv.reader(csv_file, delimiter=',')
+    # some counters for statistics
     line_count = 0
+    valid_line_count = 0
+
+    # read the CSV file. The first line should contain a valid
+    # row header.
+    csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
         if line_count == 0:
             for x in range(len(row)):
                 rval = row[x].lower()
                 if (searchColName is not None) and (searchColName.lower() == rval):
-                    srchCol = x
+                    search_column = x
                 if rval == 'tlsh':
-                    tlshCol = x
+                    tlsh_column = x
                 elif (rval == 'sha256') or (rval == 'sha1') or (rval == 'md5') or (rval == 'sha1_hash') or (rval == 'sha256_hash'):
-                    hashCol = x
+                    hash_column = x
                 elif (rval == 'signature') or (rval == 'label'):
-                    #############################
                     # signature overrides other label candidates
-                    #############################
-                    if lablCol != -1:
+                    if label_column != -1:
                         print("warning: found both 'signature' column and 'label' column")
-                        print("using ", row[lablCol] )
+                        print("using ", row[label_column] )
                     else:
-                        lablCol = x
+                        label_column = x
                 elif (rval == 'first_seen_utc') or (rval == 'firstseen'):
-                    timeCol = x
+                    time_column = x
                 elif rval == 'nitems':
-                    itemCol = x
+                    item_column = x
                 else:
                     if othCol == -1:
                         othCol = x
-            if (lablCol == -1) and (othCol != -1):
+            if (label_column == -1) and (othCol != -1):
                 if verbose > 0:
                     print("using " + row[othCol] + " as label")
-                lablCol = othCol
+                label_column = othCol
 
-            if tlshCol == -1:
+            if tlsh_column == -1:
                 print("error: file " + fname + " has no tlsh column: " + str(row) )
                 return (None, None)
             line_count += 1
         else:
-            tlshVal = row[tlshCol]
-            hashVal = row[hashCol] if (hashCol != -1) else ""
-            lablVal = row[lablCol] if (lablCol != -1) else ""
-            srchVal = row[srchCol] if (srchCol != -1) else ""
-            itemVal = row[itemCol] if (itemCol != -1) else ""
+            tlshVal = row[tlsh_column]
 
-            if timeCol != -1:
-                ts = row[timeCol]
+            # check if every line in the CSV is valid
+            if tlshVal in ["TNULL", "", "n/a"]:
+                line_count += 1
+                continue
+
+            valid_line = False
+            if (len(tlshVal) == 72) and (tlshVal[:2] == "T1"):
+                valid_line = True
+            elif len(tlshVal) == 70:
+                valid_line = True
+            else:
+                print("warning. Bad line line=", line_count, " tlshVal=", tlshVal )
+                line_count += 1
+                continue
+
+            hashVal = row[hash_column] if (hash_column != -1) else ""
+            lablVal = row[label_column] if (label_column != -1) else ""
+            srchVal = row[search_column] if (search_column != -1) else ""
+            itemVal = row[item_column] if (item_column != -1) else ""
+
+            if time_column != -1:
+                ts = row[time_column]
                 # first_seen_utc (in malware bazaar) takes format "2021-09-17 06:39:44"
                 # we want the first 10 characters
                 dateVal = ts[:10]
             else:
                 dateVal = ""
 
-            if (lablCol != -1) and (hashCol != -1):
+            if (label_column != -1) and (hash_column != -1):
                 lab = lablVal + " " + hashVal
                 lab = lablVal
-            elif lablCol != -1:
+            elif label_column != -1:
                 lab = lablVal
             else:
                 lab = hashVal
 
-            #####################
-            # check line OK
-            #####################
-            okLine = False
-            if (len(tlshVal) == 72) and (tlshVal[:2] == "T1"):
-                okLine = True
-            if len(tlshVal) == 70:
-                okLine = True
+            # check search criteria
+            includeLine = True
+            if (srchVal != "") and (searchValueList is not None):
+                if srchVal.lower() not in searchValueList:
+                    includeLine = False
 
-            if okLine:
-                # check search criteria
-                includeLine = True
-                if (srchVal != "") and (searchValueList is not None):
-                    if srchVal.lower() not in searchValueList:
-                        includeLine = False
+            if simTlsh is not None:
+                h1 = tlsh.Tlsh()
+                h1.fromTlshStr(simTlsh)
+                h2 = tlsh.Tlsh()
+                h2.fromTlshStr(tlshVal)
+                dist=h1.diff(h2)
+                if dist > simThreshold:
+                    includeLine = False
+                elif dist == 0:
+                    # the search query is an item in our file
+                    # so modify the label
+                    # and do not add the Query
+                    addSampleFlag = False
+                    lab = "QUERY " + lab
 
-                if simTlsh is not None:
-                    h1 = tlsh.Tlsh()
-                    h1.fromTlshStr(simTlsh)
-                    h2 = tlsh.Tlsh()
-                    h2.fromTlshStr(tlshVal)
-                    dist=h1.diff(h2)
-                    if dist > simThreshold:
-                        includeLine = False
-                    elif dist == 0:
-                        # the search query is an item in our file
-                        # so modify the label
-                        # and do not add the Query
-                        addSampleFlag = False
-                        lab = "QUERY " + lab
+            # check date range
+            if (sDate is not None) and (dateVal != ""):
+                if dateVal < sDate:
+                    includeLine = False
+            if (eDate is not None) and (dateVal != ""):
+                # print("check dateVal=", dateVal, " eDate=", eDate)
+                if dateVal > eDate:
+                    includeLine = False
 
-                # check date range
-                if (sDate is not None) and (dateVal != ""):
-                    if dateVal < sDate:
-                        includeLine = False
-                if (eDate is not None) and (dateVal != ""):
-                    # print("check dateVal=", dateVal, " eDate=", eDate)
-                    if dateVal > eDate:
-                        includeLine = False
+            # check item value
+            if includeLine and (searchNitems is not None) and (itemVal != ""):
+                if itemVal != str(searchNitems):
+                    includeLine = False
 
-                # check item value
-                if includeLine and (searchNitems is not None) and (itemVal != ""):
-                    if itemVal != str(searchNitems):
-                        includeLine = False
+            if includeLine:
+                tlist.append(tlshVal)
+                labelList.append(lab)
+                dateList .append(dateVal)
+                hashList .append(hashVal)
 
-                if includeLine:
-                    tlist.append(tlshVal)
-                    labelList.append(lab)
-                    dateList .append(dateVal)
-                    hashList .append(hashVal)
-            elif tlshVal not in ["TNULL", "", "n/a"]:
-                print("warning. Bad line line=", line_count, " tlshVal=", tlshVal )
-
+            valid_line_count += 1
             line_count += 1
+
     if verbose > 0:
         print(f'Read in {line_count} lines.')
+        print(f'Read in {valid_line_count} valid lines.')
 
     if (simTlsh is not None) and (addSampleFlag):
         tlist.append(simTlsh)

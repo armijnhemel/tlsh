@@ -29,7 +29,7 @@ from pylib.tlsh_lib import *
 linearCheck = False
 metricCheck = False
 hac_allowStringyClusters = False
-hac_verbose    = 0
+hac_verbose = 0
 
 def median(currlist):
     newlist = sorted(currlist)
@@ -67,25 +67,25 @@ class Node:
     # Print the tree
     def print_tree(self, maxdepth, depth):
         if depth > maxdepth:
-            print( "..." )
+            print("...")
             return
 
         if self.left_child:
-            self.left_child.print_tree(maxdepth,depth+1)
-        print ( depth * "\t", end="" )
+            self.left_child.print_tree(maxdepth, depth+1)
+        print(depth * "\t", end="")
         if self.threshold == -1:
-            print( "LEAF:  idx=" + str(self.idx) + " " + self.point )
+            print("LEAF:  idx=" + str(self.idx) + " " + self.point)
         else:
-            print( "SPLIT: idx=" + str(self.idx) + " " + self.point + " T=" + str(self.threshold))
+            print("SPLIT: idx=" + str(self.idx) + " " + self.point + " T=" + str(self.threshold))
 
         if self.right_child:
-            self.right_child.print_tree(maxdepth,depth+1)
+            self.right_child.print_tree(maxdepth, depth+1)
 
-hac_nDistCalc=0
+hac_nDistCalc = 0
 
 def hac_resetDistCalc():
     global hac_nDistCalc
-    hac_nDistCalc=0
+    hac_nDistCalc = 0
 
 def hac_lookupDistCalc():
     global hac_nDistCalc
@@ -106,7 +106,7 @@ def VPTGrow(tlshList, tobjList, tidxList):
 
     global hac_nDistCalc
     hac_nDistCalc += len(tobjList)
-    distList = [vpObj.diff(h1)  for h1 in tobjList]
+    distList = [vpObj.diff(h1) for h1 in tobjList]
     med = median(distList)
     # if med == 0:
     #     print("med = 0")
@@ -142,7 +142,7 @@ def distMetric(tobj, searchItem):
 extra_constant = 20
 
 def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
-    if node is None :
+    if node is None:
         return
 
     d = distMetric(node.tobj, searchItem)
@@ -157,7 +157,7 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
             VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, best)
         else:
             if metricCheck:
-                rightbest = { "dist":best['dist'], "point":None, "idx":best['idx'] }
+                rightbest = {"dist": best['dist'], "point": None, "idx": best['idx']}
                 VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, rightbest)
                 if rightbest['idx'] != best['idx']:
                     print("found problem right", file=sys.stderr)
@@ -172,7 +172,7 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
             VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, best)
         else:
             if metricCheck:
-                leftbest = { "dist":best['dist'], "point":None, "idx":best['idx'] }
+                leftbest = {"dist": best['dist'], "point": None, "idx": best['idx']}
                 VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, leftbest)
                 if leftbest['idx'] != best['idx']:
                     print("found problem left", file=sys.stderr)
@@ -186,7 +186,7 @@ def Tentative_Merge(gA, gB, cluster, memberList, tlshList, tobjList, rootVPT, CD
     global hac_verbose
     membersA = memberList[gA]
     for A in membersA:
-        best = { "dist":99999, "point":None, "idx":-1 }
+        best = {"dist": 99999, "point": None, "idx": -1}
         searchItem = tobjList[A]
         VPTSearch(rootVPT, searchItem, A, cluster, gA, best)
         dist = best['dist']
@@ -251,35 +251,35 @@ def Merge(gA, gB, cluster, memberList, tobjList, dist):
 
 def linearSearch(searchItem, tobjList, ignoreList, linbest):
     bestScore = 9999999
-    bestIdx   = -1
+    bestIdx = -1
     for ti in range(0, len(tobjList)):
         if ti not in ignoreList:
             h1 = tobjList[ti]
             d = searchItem.diff(h1)
             if d < bestScore:
                 bestScore = d
-                bestIdx   = ti
+                bestIdx = ti
 
     linbest['dist'] = bestScore
-    linbest['idx']  = bestIdx
+    linbest['idx'] = bestIdx
 
 def VPTsearch_add_to_heap(A, cluster, tobjList, rootVPT, heap):
-    best = { "dist":99999, "point":None, "idx":-1 }
+    best = {"dist": 99999, "point": None, "idx": -1}
     searchItem = tobjList[A]
     ignoreList = [A]
     VPTSearch(rootVPT, searchItem, A, cluster, cluster[A], best)
     dist = best['dist']
     if dist < 99999:
         B = best['idx']
-        rec = { 'pointA': A, 'pointB': B, 'dist':dist }
+        rec = {'pointA': A, 'pointB': B, 'dist': dist}
         heap.insert(rec, dist)
         ### :print("heap insert: ", rec)
 
         if linearCheck:
-            linbest = { "dist":99999, "point":None, "idx":-1 }
+            linbest = {"dist": 99999, "point": None, "idx": -1}
             linearSearch(searchItem, tobjList, ignoreList, linbest)
             lindist = linbest['dist']
-            linB    = linbest['idx']
+            linB = linbest['idx']
             if lindist < dist:
                 print("error: dist=", dist, "B=", B, file=sys.stderr)
                 print("error: lindist=", lindist, "linB=", linB, file=sys.stderr)
@@ -314,14 +314,14 @@ def print_time(title, final=0):
     else:
         tdelta = (now - prev)
         delta_micro = tdelta.microseconds + tdelta.seconds * 1000000
-        delta_ms = int( delta_micro / 1000 )
-        print(title + "-ms:\t"  + str(delta_ms))
+        delta_ms = delta_micro // 1000
+        print(title + "-ms:\t" + str(delta_ms))
 
     if final == 1:
-        tdelta = (now - startTime)
+        tdelta = now - startTime
         delta_micro = tdelta.microseconds + tdelta.seconds * 1000000
-        delta_ms = int( delta_micro / 1000 )
-        print("time-ms:\t"  + str(delta_ms))
+        delta_ms = delta_micro // 1000
+        print("time-ms:\t" + str(delta_ms))
 
     prev = now
 
@@ -362,7 +362,7 @@ def HAC_T_step3(tlshList, tobjList, CDist, rootVPT, memberList, cluster):
             if hac_verbose >= 2:
                 print("checking cluster: ci=", ci, " ", ml)
             for A in ml:
-                best = { "dist":99999, "point":None, "idx":-1 }
+                best = {"dist": 99999, "point": None, "idx": -1}
                 searchItem = tobjList[A]
                 VPTSearch(rootVPT, searchItem, A, cluster, cluster[A], best)
                 dist = best['dist']
@@ -408,7 +408,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     # Step 0: read in data / grow VPT
     ##########################
     (tlshList, tobjList, labels) = read_data(fname)
-    tidxList = range(0, len(tlshList) )
+    tidxList = range(0, len(tlshList))
 
     ##########################
     # Step 1: Preprocess data / Grow VPT
@@ -417,7 +417,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     if ndata >= 1000:
         print_time("Start")
 
-    Dn = range(0,ndata)
+    Dn = range(0, ndata)
     rootVPT = VPTGrow(tlshList, tobjList, tidxList)
 
     cluster = list(range(0, ndata))
@@ -434,7 +434,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
 
     memberList = []
     for A in Dn:
-        mlist = [ A ]
+        mlist = [A]
         memberList.append(mlist)
 
     global showNumberClusters
@@ -488,16 +488,16 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("Start")
 
-    Dn = range(0,ndata)
+    Dn = range(0, ndata)
     rootVPT = VPTGrow(tlshList, tobjList, tidxList)
 
     ##########################
     # Step 2: Cluster data
     ##########################
-    cluster    = list(range(0, ndata))
+    cluster = list(range(0, ndata))
     memberList = []
     for A in Dn:
-        mlist = [ A ]
+        mlist = [A]
         memberList.append(mlist)
 
     if (hac_verbose >= 1) or (showNumberClusters >= 1):
@@ -506,7 +506,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     tent_heap = MinHeap()
     tent_dict = {}
     for A in Dn:
-        best = {"dist":99999, "point":None, "idx":-1}
+        best = {"dist": 99999, "point": None, "idx": -1}
         searchItem = tobjList[A]
         VPTSearch(rootVPT, searchItem, A, cluster, cluster[A], best)
         dist = best['dist']
@@ -546,7 +546,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
 
             if tent2 not in tent_dict:
                 tent_dict[tent2] = 1
-                rec = { 'pointA': A, 'pointB': B, 'dist':dist }
+                rec = {'pointA': A, 'pointB': B, 'dist': dist}
                 tent_heap.insert(rec, dist)
 
     if (hac_verbose >= 1) or (showNumberClusters >= 1):
@@ -598,7 +598,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
 
     cln = 0
     dbscan_like_cluster = [-1] * len(cluster)
-    for ci in range(0, len(memberList) ):
+    for ci in range(0, len(memberList)):
         ml = memberList[ci]
         if len(ml) > 1:
             for x in ml:
@@ -639,7 +639,7 @@ def estimateRadius(ml, tobjList):
     for xi in range(0, maxni, jump):
         x = ml[xi]
         hx = tobjList[x]
-        radx=0
+        radx = 0
         for yi in range(0, maxni, jump):
             y = ml[yi]
             if x != y:
