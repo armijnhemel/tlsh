@@ -14,6 +14,7 @@
 #################################################################
 
 import csv
+import sys
 import tlsh
 import numpy as np
 
