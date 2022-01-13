@@ -417,12 +417,11 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     if ndata >= 1000:
         print_time("Start")
 
-    Dn = range(0, ndata)
     rootVPT = VPTGrow(tlshList, tobjList, tidxList)
 
     cluster = list(range(0, ndata))
     heap = MinHeap()
-    for A in Dn:
+    for A in range(ndata):
         VPTsearch_add_to_heap(A, cluster, tobjList, rootVPT, heap)
 
     if ndata >= 1000:
@@ -433,7 +432,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     ##########################
 
     memberList = []
-    for A in Dn:
+    for A in range(ndata):
         mlist = [A]
         memberList.append(mlist)
 
@@ -488,7 +487,6 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("Start")
 
-    Dn = range(0, ndata)
     rootVPT = VPTGrow(tlshList, tobjList, tidxList)
 
     ##########################
@@ -496,7 +494,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     ##########################
     cluster = list(range(0, ndata))
     memberList = []
-    for A in Dn:
+    for A in range(ndata):
         mlist = [A]
         memberList.append(mlist)
 
@@ -505,7 +503,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
 
     tent_heap = MinHeap()
     tent_dict = {}
-    for A in Dn:
+    for A in range(ndata):
         best = {"dist": 99999, "point": None, "idx": -1}
         searchItem = tobjList[A]
         VPTSearch(rootVPT, searchItem, A, cluster, cluster[A], best)
