@@ -13,8 +13,9 @@
 # see file "LICENSE
 #################################################################
 
-import sys
 import datetime
+import statistics
+import sys
 
 import tlsh
 
@@ -30,12 +31,6 @@ linearCheck = False
 metricCheck = False
 hac_allowStringyClusters = False
 hac_verbose = 0
-
-def median(currlist):
-    newlist = sorted(currlist)
-    listlen = len(currlist)
-    mid = int((listlen-1)/2)
-    return newlist[mid]
 
 
 class Node:
@@ -96,8 +91,8 @@ def vpt_grow(tobjList, tidxList):
 
     distList = [vpObj.diff(h1) for h1 in tobjList]
 
-    # compute the median
-    med = median(distList)
+    # determine the median
+    med = statistics.median_low(distList)
 
     # if med == 0:
     #     print("med = 0")
