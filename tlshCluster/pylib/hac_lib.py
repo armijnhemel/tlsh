@@ -91,7 +91,7 @@ def hac_lookupDistCalc():
     global hac_nDistCalc
     return hac_nDistCalc
 
-def VPTGrow(tlshList, tobjList, tidxList):
+def vpt_grow(tlshList, tobjList, tidxList):
     lenList = len(tlshList)
     if lenList == 0:
         return
@@ -129,8 +129,8 @@ def VPTGrow(tlshList, tobjList, tidxList):
             tobjRight.append(tobjList[li])
             tidxRight.append(tidxList[li])
 
-    thisNode.left_child = VPTGrow(tlshLeft,  tobjLeft,  tidxLeft)
-    thisNode.right_child = VPTGrow(tlshRight, tobjRight, tidxRight)
+    thisNode.left_child = vpt_grow(tlshLeft,  tobjLeft,  tidxLeft)
+    thisNode.right_child = vpt_grow(tlshRight, tobjRight, tidxRight)
     return thisNode
 
 def distMetric(tobj, searchItem):
@@ -404,20 +404,16 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     global hac_allowStringyClusters
     hac_allowStringyClusters = True
 
-    ##########################
-    # Step 0: read in data / grow VPT
-    ##########################
+    # Step 0: read in data
     (tlshList, tobjList, labels) = read_data(fname)
     tidxList = range(0, len(tlshList))
 
-    ##########################
     # Step 1: Preprocess data / Grow VPT
-    ##########################
     ndata = len(tlshList)
     if ndata >= 1000:
         print_time("Start")
 
-    rootVPT = VPTGrow(tlshList, tobjList, tidxList)
+    rootVPT = vpt_grow(tlshList, tobjList, tidxList)
 
     cluster = list(range(0, ndata))
     heap = MinHeap()
@@ -427,10 +423,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     if ndata >= 1000:
         print_time("End-Step-1")
 
-    ##########################
     # Step 2: Cluster data (HAC_T_opt)
-    ##########################
-
     memberList = []
     for A in range(ndata):
         mlist = [A]
@@ -451,9 +444,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("End-Step-2")
 
-    ##########################
     # Step 3: Find clusters which need to be merged
-    ##########################
     if (hac_verbose >= 1) or (showNumberClusters >= 1):
         print_number_clusters(memberList)
     if step3 == 0:
@@ -474,24 +465,18 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     global hac_allowStringyClusters
     hac_allowStringyClusters = allowStringy
 
-    ##########################
-    # Step 0: read in data / grow VPT
-    ##########################
+    # Step 0: read data
     (tlshList, tobjList, labels) = read_data(fname)
     tidxList = range(0, len(tlshList))
 
-    ##########################
     # Step 1: Initialise / Grow VPT
-    ##########################
     ndata = len(tlshList)
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("Start")
 
-    rootVPT = VPTGrow(tlshList, tobjList, tidxList)
+    rootVPT = vpt_grow(tlshList, tobjList, tidxList)
 
-    ##########################
     # Step 2: Cluster data
-    ##########################
     cluster = list(range(0, ndata))
     memberList = []
     for A in range(ndata):
@@ -575,9 +560,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("End-Step-2", 1)
 
-    ##########################
     # Step 3: Find Edge Cases
-    ##########################
     if (hac_verbose >= 1) or (showNumberClusters >= 1):
         print_number_clusters(memberList)
     if step3 == 0:
