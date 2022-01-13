@@ -6,7 +6,8 @@
 # Apache License: # Copyright 2013 Trend Micro Incorporated
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
-# You may obtain a copy of the License at      http://www.apache.org/licenses/LICENSE-2.0
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # BSD License: # Copyright (c) 2013, Trend Micro Incorporated. All rights reserved.
 #
@@ -26,7 +27,7 @@ class MinHeap:
 
     def getParentPosition(self, i):
         # The parent is located at floor((i-1)/2)
-        return int((i-1)/2)
+        return (i-1)//2
 
     def getLeftChildPosition(self, i):
         # The left child is located at 2 * i + 1
@@ -49,9 +50,13 @@ class MinHeap:
         return self.getRightChildPosition(i) < len(self.heap)
 
     def insert(self, key, dist):
-        rec = { "key":key, "dist":dist }
-        self.heap.append(rec) # Adds the key to the end of the list
-        self.heapify(len(self.heap) - 1) # Re-arranges the heap to maintain the heap property
+        rec = {"key": key, "dist": dist}
+
+        # add the key to the end of the list
+        self.heap.append(rec)
+
+        # re-arrange the heap to maintain the heap property
+        self.heapify(len(self.heap) - 1)
 
     def dist(self, i):
         lenheap = len(self.heap)
@@ -68,15 +73,17 @@ class MinHeap:
         self.heap[0] = self.heap[lenheap-1]
         self.heap.pop()
         self.heapify2(0)
-        return rec['key'] # Returns the min value in the heap in O(1) time.
+
+        # return the min value in the heap in O(1) time.
+        return rec['key']
 
     def heapify(self, i):
-        # Loops until it reaches a leaf node
+        # loop until a leaf node is reached
         while (self.hasParent(i) and self.dist(i) < self.dist(self.getParentPosition(i))):
-            # Swap the values
+            # swap the values
             self.heap[i], self.heap[self.getParentPosition(i)] = self.heap[self.getParentPosition(i)], self.heap[i]
 
-            # Resets the new position
+            # reset the new position
             i = self.getParentPosition(i)
 
     def heapify2(self, i):
@@ -89,18 +96,18 @@ class MinHeap:
                 pos = self.getLeftChildPosition(i)
             else:
                 pos = self.getRightChildPosition(i)
-            # end if
-            # Swap the values
+
+            # swap the values
             self.heap[i], self.heap[pos] = self.heap[pos], self.heap[i]
             i = pos
             lc = self.dist(self.getLeftChildPosition(i))
             rc = self.dist(self.getRightChildPosition(i))
 
     def printHeap(self):
-        print(self.heap) # Prints the heap
+        print(self.heap)
 
 def heap_tester():
-    heap=MinHeap()
+    heap = MinHeap()
     heap.insert("apple", 0)
     heap.insert("b", 6)
     heap.insert("c", 3)
