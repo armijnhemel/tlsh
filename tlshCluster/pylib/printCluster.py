@@ -15,7 +15,7 @@
 
 from collections import Counter
 
-def printAllCluster(outfname, cenfname, cluster, member_list, tlsh_list, tobj_list, labels, verbose):
+def printAllCluster(outfname, cenfname, cluster, member_list, tobj_list, labels, verbose):
     '''Write cluster and centers output files'''
 
     # cluster output file
@@ -39,7 +39,7 @@ def printAllCluster(outfname, cenfname, cluster, member_list, tlsh_list, tobj_li
     for ci in range(0, len(member_list)):
         ml = member_list[ci]
         if len(ml) > 1:
-            printCluster(f, cenf, ci, cluster, member_list, tlsh_list, tobj_list, label_list, dateList)
+            printCluster(f, cenf, ci, cluster, member_list, tobj_list, label_list, dateList)
 
     f.close()
     if verbose >= 1:
@@ -50,7 +50,7 @@ def printAllCluster(outfname, cenfname, cluster, member_list, tlsh_list, tobj_li
         if verbose >= 1:
             print("written ", cenfname)
 
-def printCluster(f, cenf, gA, cluster, member_list, tlsh_list, tobj_list, label_list, dateList):
+def printCluster(f, cenf, gA, cluster, member_list, tobj_list, label_list, dateList):
     outml = sorted(member_list[gA])
     rad_cluster = 99999
     rad_idx = -1
@@ -98,23 +98,23 @@ def printCluster(f, cenf, gA, cluster, member_list, tlsh_list, tobj_list, label_
     f.write("labels:\t" + labelStr + "\n")
     f.write("nlabels:\t" + str(nlabel) + "\n")
     f.write("nitems:\t" + str(nitems) + "\n")
-    f.write("center:\t" + tlsh_list[rad_idx] + "\n")
+    f.write("center:\t" + tobj_list[rad_idx].hexdigest() + "\n")
     f.write("radius:\t" + str(rad_cluster) + "\n")
 
     if len(label_list) > 0:
         for x in outml:
-            f.write("\t" + tlsh_list[x] + "\t" + label_list[x] + "\n")
+            f.write("\t" + tobj_list[x].hexdigest() + "\t" + label_list[x] + "\n")
 
     else:
         for x in outml:
-            f.write("\t" + tlsh_list[x] + "\n")
+            f.write("\t" + tobj_list[x].hexdigest() + "\n")
 
     if cenf is not None:
         if labelMostCommon == "NULL":
             labelMostCommon = "Cluster " + str(gA)
         label_date = labelMostCommon + " " + first_seen + " (" + str(nitems) + ")"
 
-        cenf.write(tlsh_list[rad_idx] + ",")
+        cenf.write(tobj_list[rad_idx].hexdigest() + ",")
         cenf.write(labelMostCommon + ",")
         cenf.write(first_seen + ",")
         cenf.write(label_date + ",")
