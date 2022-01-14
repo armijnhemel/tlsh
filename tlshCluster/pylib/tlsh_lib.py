@@ -186,11 +186,8 @@ def tlsh_csvfile(fname, searchColName=None, searchValueList=None, simTlsh=None, 
                 line_count += 1
                 continue
 
-            valid_line = False
-            if (len(tlshVal) == 72) and (tlshVal[:2] == "T1"):
-                valid_line = True
-            elif len(tlshVal) == 70:
-                valid_line = True
+            if len(tlshVal) == 70 or ((len(tlshVal) == 72) and (tlshVal[:2] == "T1")):
+                pass
             else:
                 print("warning. Bad line line=", line_count, " tlshVal=", tlshVal )
                 line_count += 1
@@ -255,8 +252,8 @@ def tlsh_csvfile(fname, searchColName=None, searchValueList=None, simTlsh=None, 
             if includeLine:
                 tlist.append(tlshVal)
                 labelList.append(lab)
-                dateList .append(dateVal)
-                hashList .append(hashVal)
+                dateList.append(dateVal)
+                hashList.append(hashVal)
 
             valid_line_count += 1
             line_count += 1
@@ -268,8 +265,8 @@ def tlsh_csvfile(fname, searchColName=None, searchValueList=None, simTlsh=None, 
     if (simTlsh is not None) and (addSampleFlag):
         tlist.append(simTlsh)
         labelList.append("QUERY")
-        dateList .append("")
-        hashList .append("")
+        dateList.append("")
+        hashList.append("")
     return(tlist, [labelList, dateList, hashList])
 
 ##########################################
