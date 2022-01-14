@@ -153,7 +153,7 @@ def tlsh_csvfile(fname, searchColName=None, searchValueList=None, simTlsh=None, 
                     search_column = x
                 if rval == 'tlsh':
                     tlsh_column = x
-                elif (rval == 'sha256') or (rval == 'sha1') or (rval == 'md5') or (rval == 'sha1_hash') or (rval == 'sha256_hash'):
+                elif rval in ['sha256', 'sha1', 'md5', 'sha1_hash', 'sha256_hash']:
                     hash_column = x
                 elif (rval == 'signature') or (rval == 'label'):
                     # signature overrides other label candidates
