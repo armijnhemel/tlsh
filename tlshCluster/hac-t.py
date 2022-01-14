@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import pathlib
 import sys
 
 from pylib.hac_lib import *
@@ -9,11 +10,11 @@ from pylib.hac_lib import *
 # simple_unittests()
 ##############################################
 
-def simple_unittests():
-    (tlsh_list, tobj_list, labels) = read_data(fname)
+def simple_unittests(fname):
+    (tobj_list, labels) = read_data(fname)
 
-    tidx_list = range(0, len(tlsh_list))
-    root = VPTGrow(tlsh_list, tobj_list, tidx_list)
+    tidx_list = range(0, len(tobj_list))
+    root = vpt_grow(tobj_list, tidx_list)
     root.print_tree(3, 0)
 
     ### id = 9655
@@ -21,11 +22,9 @@ def simple_unittests():
 
     best = {"dist": 99999, "point": None, "idx": -1}
     ignore_list = [identifier]
-    search_tlsh = tlsh_list[identifier]
-    search_item = tlsh.Tlsh()
-    search_item.fromTlshStr(search_tlsh)
+    search_item = tobj_list[identifier]
 
-    tmpcluster = list(range(0, len(tlsh_list)))
+    tmpcluster = list(range(0, len(tobj_list)))
 
     print("before: ", best)
     VPTSearch(root, search_item, identifier, tmpcluster, identifier, best)
@@ -65,7 +64,7 @@ def main():
     dbscan = args.dbscan
     allow = args.allow
     CDist = args.cdist
-    fname = args.f
+    fname = pathlib.Path(args.f)
     outfname = args.o
     cenfname = args.oc
     step3 = args.step3
@@ -91,12 +90,16 @@ def main():
         print("need a -f fname", file=sys.stderr)
         sys.exit(1)
 
+    if not fname.exists():
+        print("File %s does not exist" % fname, file=sys.stderr)
+        sys.exit(1)
+
     if outfname == "":
         print("need a -o outfname", file=sys.stderr)
         sys.exit(1)
 
     if unittest > 0:
-        simple_unittests()
+        simple_unittests(fname)
 
     if showtime == 1:
         start_time = datetime.datetime.now()
