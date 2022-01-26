@@ -41,10 +41,11 @@ class Node:
         self.tobj = tobj
         self.idx = idx
         self.threshold = threshold
+        self.point = self.tobj.hexdigest()
 
     @property
     def point(self):
-        return self.tobj.hexdigest()
+        return self.point
 
     @property
     def left_child(self):
