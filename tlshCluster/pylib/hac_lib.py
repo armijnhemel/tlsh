@@ -28,7 +28,6 @@ from pylib.tlsh_lib import *
 ###################################
 
 linearCheck = False
-metricCheck = False
 hac_allowStringyClusters = False
 hac_verbose = 0
 
@@ -145,32 +144,10 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
         VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, best)
         if (d + best['dist'] + extra_constant) >= node.threshold:
             VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, best)
-        else:
-            if metricCheck:
-                rightbest = {"dist": best['dist'], "point": None, "idx": best['idx']}
-                VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, rightbest)
-                if rightbest['idx'] != best['idx']:
-                    print("found problem right", file=sys.stderr)
-                    print("best:", best, file=sys.stderr)
-                    print("d:", d, file=sys.stderr)
-                    print("threshold:", node.threshold, file=sys.stderr)
-                    print(rightbest, file=sys.stderr)
-                    sys.exit(1)
     else:
         VPTSearch(node.right_child, searchItem, searchIdx, cluster, notInC, best)
         if (d - best['dist'] - extra_constant) <= node.threshold:
             VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, best)
-        else:
-            if metricCheck:
-                leftbest = {"dist": best['dist'], "point": None, "idx": best['idx']}
-                VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, leftbest)
-                if leftbest['idx'] != best['idx']:
-                    print("found problem left", file=sys.stderr)
-                    print("best:", best, file=sys.stderr)
-                    print("d:", d, file=sys.stderr)
-                    print("threshold:", node.threshold, file=sys.stderr)
-                    print(leftbest, file=sys.stderr)
-                    sys.exit(1)
 
 def Tentative_Merge(gA, gB, cluster, memberList, tobjList, rootVPT, CDist):
     global hac_verbose
