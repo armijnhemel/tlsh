@@ -28,39 +28,19 @@ from pylib.tlsh_lib import *
 ###################################
 
 linearCheck = False
+metricCheck = False
 hac_allowStringyClusters = False
 hac_verbose = 0
-
 
 class Node:
     '''Vantage point tree'''
     def __init__(self, tobj, idx=-1, threshold=0):
-        self._left_child = None
-        self._right_child = None
+        self.left_child = None
+        self.right_child = None
+        self.point = tobj.hexdigest()
         self.tobj = tobj
         self.idx = idx
         self.threshold = threshold
-        self.point = self.tobj.hexdigest()
-
-    @property
-    def point(self):
-        return self.point
-
-    @property
-    def left_child(self):
-        return self._left_child
-
-    @left_child.setter
-    def left_child(self, node):
-        self._left_child = node
-
-    @property
-    def right_child(self):
-        return self._right_child
-
-    @right_child.setter
-    def right_child(self, node):
-        self._right_child = node
 
     # Print the tree
     def print_tree(self, maxdepth, depth):
@@ -124,17 +104,13 @@ def vpt_grow(tobjList, tidxList):
         thisNode.right_child = None
     return thisNode
 
-def distMetric(tobj, searchItem):
-    d = searchItem.diff(tobj)
-    return d
-
 extra_constant = 20
 
 def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
     if node is None:
         return
 
-    d = distMetric(node.tobj, searchItem)
+    d = searchItem.diff(node.tobj)
     if (cluster[node.idx] != notInC) and (d < best['dist']):
         best['dist'] = d
         best['point'] = node.point
@@ -149,6 +125,8 @@ def VPTSearch(node, searchItem, searchIdx, cluster, notInC, best):
         if (d - best['dist'] - extra_constant) <= node.threshold:
             VPTSearch(node.left_child, searchItem, searchIdx, cluster, notInC, best)
 
+
+
 def Tentative_Merge(gA, gB, cluster, memberList, tobjList, rootVPT, CDist):
     global hac_verbose
     membersA = memberList[gA]
@@ -159,19 +137,9 @@ def Tentative_Merge(gA, gB, cluster, memberList, tobjList, rootVPT, CDist):
         dist = best['dist']
         B = best['idx']
         if (dist <= CDist) and (cluster[A] != cluster[B]):
-            ### print("success Tentative_Merge gA=", gA, " gB=", gB)
-            ### print("A:", tlshList[A] )
-            ### print("B:", tlshList[B] )
-            ### print("dist:", dist )
-            ### print("A=", A, best)
-
-            ### print("before merge", gA, gB)
-            ### printCluster(sys.stdout, gA, cluster, memberList, tlshList, tobjList, None)
-            ### printCluster(sys.stdout, gB, cluster, memberList, tlshList, tobjList, None)
-
             if hac_verbose >= 1:
                 print("Merge(2) A=", A, " B=", B, " dist=", dist)
-            newCluster = Merge(cluster[A], cluster[B], cluster, memberList, tobjList, dist)
+            Merge(cluster[A], cluster[B], cluster, memberList, tobjList, dist)
             if hac_verbose >= 2:
                 print("success Tentative_Merge gA=", gA, " gB=", gB)
             return 1
@@ -181,11 +149,6 @@ def Tentative_Merge(gA, gB, cluster, memberList, tobjList, rootVPT, CDist):
     return 0
 
 def Merge(gA, gB, cluster, memberList, tobjList, dist):
-    # radA = estimateRadius(memberList[gA], tobjList)
-    # radB = estimateRadius(memberList[gB], tobjList)
-    # print("before merge", gA, gB)
-    # printCluster(gA, cluster, memberList)
-    # printCluster(gB, cluster, memberList)
     if gA == gB:
         print("warning in Merge gA=", gA, " gB=", gB)
         return gA
@@ -203,26 +166,18 @@ def Merge(gA, gB, cluster, memberList, tobjList, dist):
 
     membersA = memberList[c1]
     for x in memberList[c2]:
-        ### print("x=", x)
         membersA.append(x)
         cluster[x] = c1
     memberList[c2] = []
 
-    # print("after merge", gA, gB)
-    # printCluster(gA, cluster, memberList)
-    # printCluster(gB, cluster, memberList)
-    # radc1 = estimateRadius(memberList[c1], tobjList)
-    # if radc1 > 30:
-    #    print("ERROR before merge:    rad(A)=", radA, " rad(B)=", radB, " dist=", dist, "    after rad=", radc1)
     return c1
 
 def linearSearch(searchItem, tobjList, ignoreList, linbest):
     bestScore = 9999999
     bestIdx = -1
-    for ti in range(0, len(tobjList)):
+    for ti, obj in enumerate(tobjList):
         if ti not in ignoreList:
-            h1 = tobjList[ti]
-            d = searchItem.diff(h1)
+            d = searchItem.diff(obj)
             if d < bestScore:
                 bestScore = d
                 bestIdx = ti
@@ -240,7 +195,6 @@ def VPTsearch_add_to_heap(A, cluster, tobjList, rootVPT, heap):
         B = best['idx']
         rec = {'pointA': A, 'pointB': B, 'dist': dist}
         heap.insert(rec, dist)
-        ### :print("heap insert: ", rec)
 
         if linearCheck:
             linbest = {"dist": 99999, "point": None, "idx": -1}
@@ -406,7 +360,7 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
         B = rec['pointB']
         d = rec['dist']
         if (d <= CDist) and (cluster[A] != cluster[B]):
-            newCluster = Merge(cluster[A], cluster[B], cluster, memberList, tobjList, d)
+            Merge(cluster[A], cluster[B], cluster, memberList, tobjList, d)
 
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("End-Step-2")
@@ -426,23 +380,24 @@ def HAC_T_opt(fname, CDist, step3, outfname, cenfname, verbose=0):
         print_number_clusters(memberList, True)
     printAllCluster(outfname, cenfname, cluster, memberList, tobjList, labels, hac_verbose)
 
+
 def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     global hac_verbose
-    hac_verbose = 0
+    hac_verbose = verbose
     global hac_allowStringyClusters
     hac_allowStringyClusters = allowStringy
 
     # Step 0: read data
     (tobjList, labels) = read_data(fname)
     tidxList = range(0, len(tobjList))
-
+    
     # Step 1: Initialise / Grow VPT
     ndata = len(tobjList)
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("Start")
 
     rootVPT = vpt_grow(tobjList, tidxList)
-
+    
     # Step 2: Cluster data
     cluster = list(range(0, ndata))
     memberList = []
@@ -482,7 +437,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
             if mergeOK:
                 if hac_verbose >= 1:
                     print("Merge(1) A=", A, " B=", B, " dist=", dist)
-                newCluster = Merge(cluster[A], cluster[B], cluster, memberList, tobjList, dist)
+                Merge(cluster[A], cluster[B], cluster, memberList, tobjList, dist)
 
         elif (dist <= 2 * CDist) and (hac_allowStringyClusters):
             if hac_verbose >= 2:
@@ -526,6 +481,8 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
 
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("End-Step-2", 1)
+    
+    
 
     # Step 3: Find Edge Cases
     if (hac_verbose >= 1) or (showNumberClusters >= 1):
@@ -553,7 +510,8 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
                 dbscan_like_cluster[x] = cln
             cln += 1
 
-    return dbscan_like_cluster
+    
+    return 
 
 def DBSCAN_procedure(fname, CDist, outfname, cenfname, verbose=0):
     (tlist, labels) = tlsh_csvfile(fname)
