@@ -390,14 +390,14 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
     # Step 0: read data
     (tobjList, labels) = read_data(fname)
     tidxList = range(0, len(tobjList))
-    
+
     # Step 1: Initialise / Grow VPT
     ndata = len(tobjList)
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("Start")
 
     rootVPT = vpt_grow(tobjList, tidxList)
-    
+
     # Step 2: Cluster data
     cluster = list(range(0, ndata))
     memberList = []
@@ -481,8 +481,6 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
 
     if (hac_verbose >= 1) and (ndata >= 1000):
         print_time("End-Step-2", 1)
-    
-    
 
     # Step 3: Find Edge Cases
     if (hac_verbose >= 1) or (showNumberClusters >= 1):
@@ -509,9 +507,7 @@ def HAC_T(fname, CDist, step3, outfname, cenfname, allowStringy=0, verbose=0):
             for x in ml:
                 dbscan_like_cluster[x] = cln
             cln += 1
-
-    
-    return 
+    return
 
 def DBSCAN_procedure(fname, CDist, outfname, cenfname, verbose=0):
     (tlist, labels) = tlsh_csvfile(fname)
