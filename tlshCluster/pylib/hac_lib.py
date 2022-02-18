@@ -95,7 +95,7 @@ def vpt_grow(tobjList, tidxList):
 
     # recursively walk the data, unless there is no more data
     if tobjLeft != []:
-        thisNode.left_child = vpt_grow(tobjLeft,  tidxLeft)
+        thisNode.left_child = vpt_grow(tobjLeft, tidxLeft)
     else:
         thisNode.left_child = None
     if tobjRight != []:
